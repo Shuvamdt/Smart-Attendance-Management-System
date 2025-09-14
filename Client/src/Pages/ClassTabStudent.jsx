@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
+import QRScanner from "../Components/QRScanner";
 
 const ClassTabStudent = () => {
   const [classdet, setClassdet] = useState(null);
+  const [showScanner, setShowScanner] = useState(false);
 
   useEffect(() => {
     const loadClass = () => {
@@ -9,9 +11,7 @@ const ClassTabStudent = () => {
         const stored = localStorage.getItem("class");
         if (stored) {
           const parsed = JSON.parse(stored);
-          if (!parsed.student) {
-            parsed.student = [];
-          }
+          if (!parsed.student) parsed.student = [];
           setClassdet(parsed);
         } else {
           setClassdet(null);
@@ -21,21 +21,21 @@ const ClassTabStudent = () => {
         setClassdet(null);
       }
     };
+
     loadClass();
     window.addEventListener("storage", loadClass);
-    return () => {
-      window.removeEventListener("storage", loadClass);
-    };
+    return () => window.removeEventListener("storage", loadClass);
   }, []);
 
   const giveAttendance = () => {
     if (!classdet) return;
     const updatedClass = { ...classdet };
+
     if (!updatedClass.student.includes("12023002001387")) {
       const code = localStorage.getItem("code");
+      const inputCode = prompt("Enter the attendance code:");
 
-      const userCode = prompt("Enter the attendance code:");
-      if (userCode === code) {
+      if (inputCode == code) {
         updatedClass.student = [...updatedClass.student, "12023002001387"];
         localStorage.setItem("class", JSON.stringify(updatedClass));
         setClassdet(updatedClass);
@@ -47,38 +47,53 @@ const ClassTabStudent = () => {
   };
 
   return (
-    <div>
-      <div className="flex flex-col justify-center items-center py-4 my-2">
-        {classdet != null ? (
-          <div className="flex flex-col justify-baseline items-center px-4 py-2 bg-blue-400 w-200 border border-blue-800 rounded-2xl">
-            <div className="flex flex-col justify-baseline items-center px-4 py-2 gap-2 text-white">
-              <h1>Class id: {classdet.classid}</h1>
-              <h1>Period: {classdet.period}</h1>
-              <h1>Year: {classdet.year}</h1>
-            </div>
-            <button
-              onClick={giveAttendance}
-              className="bg-blue-950 text-white rounded-2xl px-5 py-2"
-            >
-              Give attendance
-            </button>
-            <div className="mt-4">
-              <h2 className="text-white font-bold">Present Students:</h2>
-              {classdet.student && classdet.student.length > 0 ? (
-                classdet.student.map((s, i) => (
-                  <p key={i} className="text-white">
-                    {s}
-                  </p>
-                ))
-              ) : (
-                <p className="text-white">No students yet</p>
-              )}
-            </div>
+    <div className="flex flex-col justify-center items-center py-4 my-2">
+      {classdet ? (
+        <div className="flex flex-col justify-baseline items-center px-4 py-2 bg-blue-400 w-200 border border-blue-800 rounded-2xl">
+          <div className="flex flex-col justify-baseline items-center px-4 py-2 gap-2 text-white">
+            <h1>Class id: {classdet.classid}</h1>
+            <h1>Period: {classdet.period}</h1>
+            <h1>Year: {classdet.year}</h1>
           </div>
-        ) : (
-          <h1>No classes uploaded</h1>
-        )}
-      </div>
+
+          <button
+            onClick={giveAttendance}
+            className="bg-blue-950 text-white rounded-2xl px-5 py-2"
+          >
+            Give attendance
+          </button>
+
+          <button
+            onClick={() => {
+              setShowScanner(!showScanner);
+            }}
+            className="bg-blue-950 text-white rounded-2xl px-5 py-2 mt-4"
+          >
+            {showScanner ? "Close QR Scanner" : "Open QR Scanner"}
+          </button>
+
+          {showScanner && (
+            <div className="mt-4 w-full">
+              <QRScanner classdet={classdet} setClassdet={setClassdet} />
+            </div>
+          )}
+
+          <div className="mt-4">
+            <h2 className="text-white font-bold">Present Students:</h2>
+            {classdet.student && classdet.student.length > 0 ? (
+              classdet.student.map((s, i) => (
+                <p key={i} className="text-white">
+                  {s}
+                </p>
+              ))
+            ) : (
+              <p className="text-white">No students yet</p>
+            )}
+          </div>
+        </div>
+      ) : (
+        <h1>No classes uploaded</h1>
+      )}
     </div>
   );
 };
