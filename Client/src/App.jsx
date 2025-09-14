@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Registration from "./Pages/Registration";
 import Home from "./Pages/Home";
-import ClassTabStudent from "./Pages/ClasstabStudent";
+import ClassTabStudent from "./Pages/ClassTabStudent";
 import Admin from "./Pages/Admin";
 
 class ClassDetails {
