@@ -2,10 +2,13 @@ import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import pg from "pg";
+import dotenv from dotenv;
 
 const PORT = 3000;
+dotenv.config();
 
 const app = express();
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(
@@ -13,11 +16,12 @@ app.use(
     origin: "*",
   })
 );
+
 const db = new pg.Client({
-  host: "db.deqvktkwtlbzlestkiwu.supabase.co",
-  user: "postgres",
-  password: "shuvam@2003",
-  port: 5432,
+  host: process.env.DATABASE_HOSTNAME,
+  user: process.env.DATABASE_USER,
+  password: process.env.DATABASE_PASSWORD,
+  port: process.env.DATABASE_PORT,
 });
 
 await db.connect();
