@@ -1,59 +1,59 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import QRScanner from "../Components/QRScanner";
+import { EnrollmentContext } from "../Components/EnrollmentContext";
+import { ClassContext } from "../Components/ClassContext";
+import { ClassCodeContext } from "../Components/ClassCodeContext";
 
 const ClassTabStudent = () => {
-  const [classdet, setClassdet] = useState(null);
+  const { classDetails, setClassDetails } = useContext(ClassContext);
   const [showScanner, setShowScanner] = useState(false);
+  const { enrollment } = useContext(EnrollmentContext);
+  const { code } = useContext(ClassCodeContext);
 
   useEffect(() => {
-    const loadClass = () => {
+    const stored = localStorage.getItem("class");
+    if (stored) {
       try {
-        const stored = localStorage.getItem("class");
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (!parsed.student) parsed.student = [];
-          setClassdet(parsed);
-        } else {
-          setClassdet(null);
-        }
+        const parsed = JSON.parse(stored);
+        if (!parsed.students) parsed.students = [];
+        setClassDetails(parsed);
       } catch (error) {
         console.error("Error parsing class data:", error);
-        setClassdet(null);
+        setClassDetails(null);
       }
-    };
-
-    loadClass();
-    window.addEventListener("storage", loadClass);
-    return () => window.removeEventListener("storage", loadClass);
-  }, []);
+    } else {
+      setClassDetails(null);
+    }
+  }, [setClassDetails]);
 
   const giveAttendance = () => {
-    if (!classdet) return;
-    const updatedClass = { ...classdet };
+    if (!classDetails) return;
 
-    if (!updatedClass.student.includes("12023002001387")) {
-      const code = localStorage.getItem("code");
+    const updatedClass = { ...classDetails };
+
+    if (!updatedClass.students.includes(enrollment)) {
       const inputCode = prompt("Enter the attendance code:");
-
-      if (inputCode == code) {
-        updatedClass.student = [...updatedClass.student, "12023002001387"];
+      if (inputCode === code) {
+        updatedClass.students = [...updatedClass.students, enrollment];
+        setClassDetails(updatedClass);
         localStorage.setItem("class", JSON.stringify(updatedClass));
-        setClassdet(updatedClass);
         alert("Attendance marked ✅");
       } else {
         alert("Wrong code ❌");
       }
+    } else {
+      alert("You already gave attendance ✅");
     }
   };
 
   return (
     <div className="flex flex-col justify-center items-center py-4 my-2">
-      {classdet ? (
+      {classDetails ? (
         <div className="flex flex-col justify-baseline items-center px-4 py-2 bg-blue-400 w-200 border border-blue-800 rounded-2xl">
           <div className="flex flex-col justify-baseline items-center px-4 py-2 gap-2 text-white">
-            <h1>Class id: {classdet.classid}</h1>
-            <h1>Period: {classdet.period}</h1>
-            <h1>Year: {classdet.year}</h1>
+            <h1>Class id: {classDetails.classid}</h1>
+            <h1>Period: {classDetails.period}</h1>
+            <h1>Year: {classDetails.year}</h1>
           </div>
 
           <button
@@ -64,9 +64,7 @@ const ClassTabStudent = () => {
           </button>
 
           <button
-            onClick={() => {
-              setShowScanner(!showScanner);
-            }}
+            onClick={() => setShowScanner(!showScanner)}
             className="bg-blue-950 text-white rounded-2xl px-5 py-2 mt-4"
           >
             {showScanner ? "Close QR Scanner" : "Open QR Scanner"}
@@ -74,14 +72,17 @@ const ClassTabStudent = () => {
 
           {showScanner && (
             <div className="mt-4 w-full">
-              <QRScanner classdet={classdet} setClassdet={setClassdet} />
+              <QRScanner
+                classdet={classDetails}
+                setClassdet={setClassDetails}
+              />
             </div>
           )}
 
           <div className="mt-4">
             <h2 className="text-white font-bold">Present Students:</h2>
-            {classdet.student && classdet.student.length > 0 ? (
-              classdet.student.map((s, i) => (
+            {classDetails.students && classDetails.students.length > 0 ? (
+              classDetails.students.map((s, i) => (
                 <p key={i} className="text-white">
                   {s}
                 </p>

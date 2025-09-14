@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useContext } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { EnrollmentContext } from "../Components/EnrollmentContext";
 
 const API_URL = "http://localhost:3000";
 
 const Registration = () => {
+  const { enrollment, setEnrollment } = useContext(EnrollmentContext);
   const navigate = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -12,7 +14,8 @@ const Registration = () => {
     const data = Object.fromEntries(formData.entries());
     try {
       await axios.post(`${API_URL}/submit`, { formData: data });
-      alert("Registered successfully!");
+      setEnrollment(data.enroll);
+      alert(`${data.enroll} Registered successfully!`);
       navigate("/class-tab-student");
     } catch (error) {
       alert("Error uploading data ");

@@ -4,6 +4,9 @@ import Registration from "./Pages/Registration";
 import Home from "./Pages/Home";
 import ClassTabStudent from "./Pages/ClassTabStudent";
 import Admin from "./Pages/Admin";
+import EnrollmentProvider from "./Components/EnrollmentProvider";
+import ClassProvider from "./Components/ClassProvider";
+import ClassCodeProvider from "./Components/ClassCodeProvider";
 
 class ClassDetails {
   constructor(classid, year, period, students) {
@@ -15,20 +18,27 @@ class ClassDetails {
 }
 
 const App = () => {
-  const classdet = new ClassDetails();
-  localStorage.setItem("class", JSON.stringify(classdet));
   return (
     <div>
-      <div className="min-h-screen overflow-x-hidden">
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/student-form" element={<Registration />} />
-            <Route path="/class-tab-student" element={<ClassTabStudent />} />
-            <Route path="/admin" element={<Admin />} />
-          </Routes>
-        </BrowserRouter>
-      </div>
+      <EnrollmentProvider>
+        <ClassProvider>
+          <ClassCodeProvider>
+            <div className="min-h-screen overflow-x-hidden">
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/student-form" element={<Registration />} />
+                  <Route
+                    path="/class-tab-student"
+                    element={<ClassTabStudent />}
+                  />
+                  <Route path="/admin" element={<Admin />} />
+                </Routes>
+              </BrowserRouter>
+            </div>
+          </ClassCodeProvider>
+        </ClassProvider>
+      </EnrollmentProvider>
     </div>
   );
 };
